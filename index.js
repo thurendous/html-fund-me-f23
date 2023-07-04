@@ -5,19 +5,25 @@ const connectButton = document.getElementById("connectButton")
 const withdrawButton = document.getElementById("withdrawButton")
 const fundButton = document.getElementById("fundButton")
 const balanceButton = document.getElementById("balanceButton")
+// const showOwner = document.getElementById("showOnwer")
+const ownerPassage = document.getElementById("owner")
 connectButton.onclick = connect
 withdrawButton.onclick = withdraw
 fundButton.onclick = fund
 balanceButton.onclick = getBalance
+// showOwner.onclick = ShowMeTheOwner
 
 async function connect() {
   if (typeof window.ethereum !== "undefined") {
+    // if ethereum exists or not
     try {
+      // connect the wallet
       await ethereum.request({ method: "eth_requestAccounts" })
     } catch (error) {
+      // user denied account access
       console.log(error)
     }
-    connectButton.innerHTML = "Connected"
+    connectButton.innerHTML = "Connected dude"
     const accounts = await ethereum.request({ method: "eth_accounts" })
     console.log(accounts)
   } else {
@@ -29,7 +35,7 @@ async function withdraw() {
   console.log(`Withdrawing...`)
   if (typeof window.ethereum !== "undefined") {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
-    await provider.send('eth_requestAccounts', [])
+    await provider.send("eth_requestAccounts", [])
     const signer = provider.getSigner()
     const contract = new ethers.Contract(contractAddress, abi, signer)
     try {
@@ -52,7 +58,7 @@ async function fund() {
     const signer = provider.getSigner()
     const contract = new ethers.Contract(contractAddress, abi, signer)
     try {
-      const transactionResponse = await contract.fund({
+      const transactionResponse = await contract.steal({
         value: ethers.utils.parseEther(ethAmount),
       })
       await listenForTransactionMine(transactionResponse, provider)
@@ -65,6 +71,7 @@ async function fund() {
 }
 
 async function getBalance() {
+  console.log(`Getting balance...`)
   if (typeof window.ethereum !== "undefined") {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     try {
@@ -89,3 +96,21 @@ function listenForTransactionMine(transactionResponse, provider) {
     })
   })
 }
+
+async function ShowMeTheOwner() {
+  console.log(`Getting owner...`)
+  if (typeof window.ethereum !== "undefined") {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    try {
+      const contract = new ethers.Contract(contractAddress, abi, provider)
+      const owner = await contract.getOwner()
+      ownerPassage.innerHTML = owner
+    } catch (error) {
+      console.log(error)
+    }
+  } else {
+    showOwner.innerHTML = "Please install MetaMask"
+  }
+}
+
+ShowMeTheOwner()
